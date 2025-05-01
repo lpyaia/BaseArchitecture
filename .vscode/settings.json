@@ -1,0 +1,11 @@
+{
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "csharp": false
+    },
+    "editor.fontLigatures": true,
+    "editor.fontFamily": "Monaco,Consolas, 'Courier New', monospace"
+}
