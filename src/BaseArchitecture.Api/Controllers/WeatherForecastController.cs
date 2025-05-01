@@ -1,5 +1,5 @@
 using Azure;
-using BaseArchitecture.Api.DTOs.WeatherForecast;
+using BaseArchitecture.Features.WeatherForecasts.GetWeatherForecasts;
 
 namespace BaseArchitecture.Api.Controllers;
 

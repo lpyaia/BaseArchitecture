@@ -2,13 +2,13 @@ using BaseArchitecture.Shared.MarkerInterfaces;
 
 namespace BaseArchitecture.Shared.Responses;
 
-public sealed record PagedResponse<T>(
+public sealed record PagedDbResult<T>(
     List<T> Data,
     int TotalCount,
     int PageNumber,
     int PageSize = 10
 )
-    where T : IDto
+    where T : IDomainEntity
 {
     public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 

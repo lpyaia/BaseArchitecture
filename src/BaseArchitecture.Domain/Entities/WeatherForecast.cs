@@ -1,6 +1,8 @@
+using BaseArchitecture.Shared.MarkerInterfaces;
+
 namespace BaseArchitecture.Domain.Entities;
 
-public class WeatherForecast
+public class WeatherForecast : IDomainEntity
 {
     public Guid Id { get; set; }
     public DateTime Date { get; set; }

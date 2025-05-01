@@ -1,3 +1,4 @@
+using BaseArchitecture.Shared.MarkerInterfaces;
 using BaseArchitecture.Shared.Responses;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,12 +6,13 @@ namespace BaseArchitecture.Infrastructure.Data.Extensions;
 
 public static class ToPagedResult
 {
-    public static async Task<PagedResponse<T>> ToPagedResultAsync<T>(
+    public static async Task<PagedDbResult<T>> ToPagedResultAsync<T>(
         this IQueryable<T> query,
         int page,
         int pageSize,
         CancellationToken cancellationToken
     )
+        where T : IDomainEntity
     {
         int count = await query.CountAsync(cancellationToken);
 
@@ -19,6 +21,6 @@ public static class ToPagedResult
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        return new PagedResponse<T>(data, count, page + 1);
+        return new PagedDbResult<T>(data, count, page);
     }
 }
