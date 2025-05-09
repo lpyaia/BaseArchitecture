@@ -1,5 +1,6 @@
 using BaseArchitecture.Api.Controllers;
 using BaseArchitecture.Infrastructure.Data;
+using Mediator;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,7 +9,13 @@ builder.Services.AddDbContext<BaseArchitectureDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-builder.Services.AddMediator();
+builder.Services.AddMediator(
+    (MediatorOptions options) =>
+    {
+        options.Namespace = "BaseArchitecture.Features.WeatherForecasts";
+        options.ServiceLifetime = ServiceLifetime.Scoped;
+    }
+);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -31,6 +38,9 @@ foreach (var controller in controllers)
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options => {
+        options.SwaggerEndpoint("/openapi/v1.json", "Base Architecture API");
+    });
 }
 
 app.UseHttpsRedirection();

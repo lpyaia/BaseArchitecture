@@ -21,6 +21,6 @@ public static class ToPagedResult
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        return new PagedDbResult<T>(data, count, page);
+        return new PagedDbResult<T>(data, count, page, pageSize);
     }
 }

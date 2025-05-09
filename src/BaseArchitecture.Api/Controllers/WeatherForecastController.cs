@@ -1,5 +1,9 @@
-using Azure;
+using System.Threading.Tasks;
+using BaseArchitecture.Features.WeatherForecasts;
 using BaseArchitecture.Features.WeatherForecasts.GetWeatherForecasts;
+using BaseArchitecture.Features.WeatherForecasts.PostWeatherForecast;
+using BaseArchitecture.Shared.Responses;
+using Mediator;
 
 namespace BaseArchitecture.Api.Controllers;
 
@@ -7,37 +11,40 @@ public class WeatherForecastController : IMinimalApiController
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("/weather-forecast", GetWeatherForecasts)
+        app.MapGet("/weather-forecasts", GetWeatherForecasts)
             .WithName("GetWeatherForecasts")
-            .Produces<Response<List<WeatherForecastDto>>>(StatusCodes.Status200OK)
+            .Produces<PagedResponse<WeatherForecastDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .WithTags("WeatherForecast");
+
+        app.MapPost("/weather-forecasts", PostWeatherForecast)
+            .WithName("PostWeatherForecast")
+            .Produces<WeatherForecastDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .WithTags("WeatherForecast");
 
         //.RequireAuthorization("ApiScope");
     }
 
-    private static IResult GetWeatherForecasts()
+    private static async Task<IResult> GetWeatherForecasts(
+        IMediator mediator,
+        int page,
+        int pageSize = 10
+    )
     {
-        return Results.Ok(new List<WeatherForecastDto>());
+        var query = new GetWeatherForecastsQuery(page, pageSize);
+        var result = await mediator.Send(query);
+
+        return Results.Ok(result);
     }
 
-    private static IResult GetWeatherForecastById(Guid id)
+    private static async Task<IResult> PostWeatherForecast(
+        IMediator mediator,
+        PostWeatherForecastCommand command
+    )
     {
-        return Results.Ok(new WeatherForecastDto(default, default, default, null));
-    }
+        var response = await mediator.Send(command);
 
-    private static IResult PostWeatherForecast()
-    {
-        Guid id = new Guid();
-
-        return Results.Created(
-            $"weather-forecast/{id}",
-            new WeatherForecastDto(default, default, default, null)
-        );
-    }
-
-    private static IResult DeleteWeatherForecast()
-    {
-        return Results.NoContent();
+        return Results.Created($"weather-forecast/{response.Id}", response);
     }
 }

@@ -2,6 +2,7 @@ using BaseArchitecture.Infrastructure.Data;
 using BaseArchitecture.Infrastructure.Data.Extensions;
 using BaseArchitecture.Shared.Responses;
 using Mediator;
+using Microsoft.EntityFrameworkCore;
 
 namespace BaseArchitecture.Features.WeatherForecasts.GetWeatherForecasts;
 
@@ -21,7 +22,8 @@ public sealed class GetWeatherForecastsHandler
     )
     {
         PagedDbResult<Domain.Entities.WeatherForecast> result = await _dbContext
-            .WeatherForecasts.AsQueryable()
+            .WeatherForecasts.AsNoTracking()
+            .OrderByDescending(x => x.Date)
             .ToPagedResultAsync(request.Page, request.PageSize, cancellationToken);
 
         return result.Convert(WeatherForecastDto.FromDomain);
