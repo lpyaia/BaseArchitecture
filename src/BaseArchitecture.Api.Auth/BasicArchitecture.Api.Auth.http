@@ -1,0 +1,6 @@
+@BasicArchitecture.Api.Auth_HostAddress = http://localhost:5257
+
+GET {{BasicArchitecture.Api.Auth_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

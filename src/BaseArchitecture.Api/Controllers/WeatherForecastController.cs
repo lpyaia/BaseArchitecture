@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using BaseArchitecture.Features.WeatherForecasts;
 using BaseArchitecture.Features.WeatherForecasts.GetWeatherForecasts;
 using BaseArchitecture.Features.WeatherForecasts.PostWeatherForecast;
@@ -15,13 +14,32 @@ public class WeatherForecastController : IMinimalApiController
             .WithName("GetWeatherForecasts")
             .Produces<PagedResponse<WeatherForecastDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithTags("WeatherForecast");
+            .WithTags("WeatherForecast")
+            .RequireAuthorization();
 
         app.MapPost("/weather-forecasts", PostWeatherForecast)
             .WithName("PostWeatherForecast")
             .Produces<WeatherForecastDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .WithTags("WeatherForecast");
+
+        app.MapGet("admin", () => "Admin!")
+            .WithName("RoleAdmin")
+            .Produces(StatusCodes.Status200OK)
+            .WithTags("RoleAdmin")
+            .RequireAuthorization("RequireAdminRole");
+
+        app.MapGet("user", () => "User!")
+            .WithName("RoleUser")
+            .Produces(StatusCodes.Status200OK)
+            .WithTags("RoleUser")
+            .RequireAuthorization("RequireUserRole");
+
+        app.MapGet("admin-user", () => "Admin+User!")
+            .WithName("RoleAdminUser")
+            .Produces(StatusCodes.Status200OK)
+            .WithTags("RoleAdminUser")
+            .RequireAuthorization("RequireUserRole", "RequireAdminRole");
 
         //.RequireAuthorization("ApiScope");
     }
