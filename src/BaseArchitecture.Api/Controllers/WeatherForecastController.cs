@@ -39,9 +39,31 @@ public class WeatherForecastController : IMinimalApiController
             .WithName("RoleAdminUser")
             .Produces(StatusCodes.Status200OK)
             .WithTags("RoleAdminUser")
-            .RequireAuthorization("RequireUserRole", "RequireAdminRole");
+            .RequireAuthorization("RequireAdminOrUserRole");
 
-        //.RequireAuthorization("ApiScope");
+        app.MapGet("it", () => "IT")
+            .WithName("OnlyITAllowed")
+            .Produces(StatusCodes.Status200OK)
+            .WithTags("OnlyITAllowed")
+            .RequireAuthorization("OnlyITAllowed");
+
+        app.MapGet("sales", () => "Sales")
+            .WithName("OnlySalesAllowed")
+            .Produces(StatusCodes.Status200OK)
+            .WithTags("OnlySalesAllowed")
+            .RequireAuthorization("OnlySalesAllowed");
+
+        app.MapGet("sales-it", () => "Sales or IT")
+            .WithName("SalesOrITAllowed")
+            .Produces(StatusCodes.Status200OK)
+            .WithTags("SalesOrITAllowed")
+            .RequireAuthorization("SalesOrITAllowed");
+
+        app.MapGet("sales-and-it", () => "Sales and IT")
+            .WithName("SalesAndITAllowed")
+            .Produces(StatusCodes.Status200OK)
+            .WithTags("SalesAndITAllowed")
+            .RequireAuthorization("SalesAndITAllowed");
     }
 
     private static async Task<IResult> GetWeatherForecasts(

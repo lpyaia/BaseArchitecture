@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using BasicArchitecture.Api.Auth;
 using BasicArchitecture.Api.Auth.Data;
@@ -117,7 +118,7 @@ if (app.Environment.IsDevelopment())
     var dbContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
+    
     dbContext.Database.Migrate();
 
     if (!roleManager.Roles.Any())
@@ -144,6 +145,67 @@ if (app.Environment.IsDevelopment())
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+
+    if (await userManager.FindByEmailAsync("jorge.ben@example.com") == null)
+    {
+        var jorgeBen = new ApplicationUser
+        {
+            UserName = "jorge.ben@example.com",
+            Email = "jorge.ben@example.com",
+            FirstName = "Jorge",
+            LastName = "Ben",
+            EmailConfirmed = true,
+        };
+
+        var result = await userManager.CreateAsync(jorgeBen, "Jorge123!");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(jorgeBen, "User");
+            await userManager.AddClaimAsync(jorgeBen, new Claim("department", "Sales"));
+        }
+    }
+
+    if (await userManager.FindByEmailAsync("raul.seixas@example.com") == null)
+    {
+        var raulSeixas = new ApplicationUser
+        {
+            UserName = "raul.seixas@example.com",
+            Email = "raul.seixas@example.com",
+            FirstName = "Raul",
+            LastName = "Seixas",
+            EmailConfirmed = true,
+        };
+
+        var result = await userManager.CreateAsync(raulSeixas, "Raul123!");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(raulSeixas, "User");
+            await userManager.AddClaimAsync(raulSeixas, new Claim("department", "IT"));
+        }
+    }
+
+    if (await userManager.FindByEmailAsync("tim.maia@example.com") == null)
+    {
+        var timMaia = new ApplicationUser
+        {
+            UserName = "tim.maia@example.com",
+            Email = "tim.maia@example.com",
+            FirstName = "Tim",
+            LastName = "Maia",
+            EmailConfirmed = true,
+        };
+
+        var result = await userManager.CreateAsync(timMaia, "Tim123!");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(timMaia, "User");
+            await userManager.AddClaimAsync(timMaia, new Claim("department", "IT"));
+            await userManager.AddClaimAsync(timMaia, new Claim("department", "Sales"));
         }
     }
 }

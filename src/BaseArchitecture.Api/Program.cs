@@ -1,4 +1,3 @@
-using System.Text;
 using BaseArchitecture.Api.Controllers;
 using BaseArchitecture.Infrastructure.Data;
 using Mediator;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,13 +15,11 @@ builder.Services.AddDbContext<BaseArchitectureDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-builder.Services.AddMediator(
-    (MediatorOptions options) =>
-    {
-        options.Namespace = "BaseArchitecture.Features.WeatherForecasts";
-        options.ServiceLifetime = ServiceLifetime.Scoped;
-    }
-);
+builder.Services.AddMediator((MediatorOptions options) =>
+{
+    options.Namespace = "BaseArchitecture.Features.WeatherForecasts";
+    options.ServiceLifetime = ServiceLifetime.Scoped;
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -31,36 +29,40 @@ builder.Services.AddOpenApi(options =>
     options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_0;
 });
 
-builder
-    .Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
-            ),
-        };
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+        ),
+    };
+});
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
     options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
-    options.AddPolicy(
-        "CanManageUsers",
-        policy => policy.RequireClaim("Permission", "UserManagement")
-    );
+
+    options.AddPolicy("RequireAdminOrUserRole", policy => 
+        policy.RequireAssertion(context => 
+            context.User.IsInRole("Admin") || context.User.IsInRole("User")));
+
+    options.AddPolicy("OnlyITAllowed", policy => policy.RequireClaim("department", "IT"));
+    options.AddPolicy("OnlySalesAllowed", policy => policy.RequireClaim("department", "Sales"));
+    options.AddPolicy("SalesOrITAllowed", policy => policy.RequireAssertion(context => context.User.HasClaim("department", "Sales") || context.User.HasClaim("department", "IT")));
+    options.AddPolicy("SalesAndITAllowed", policy => policy.RequireAssertion(context => context.User.HasClaim("department", "Sales") && context.User.HasClaim("department", "IT")));
 });
 
 builder.Services.AddSwaggerGen(c =>
